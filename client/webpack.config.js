@@ -3,6 +3,9 @@ const WebpackPwaManifest = require("webpack-pwa-manifest");
 const path = require("path");
 const { InjectManifest } = require("workbox-webpack-plugin");
 
+// TODO: Add and configure workbox plugins for a service worker and manifest file.
+// TODO: Add CSS loaders and babel to webpack.
+
 module.exports = () => {
   return {
     mode: "development",
@@ -16,45 +19,46 @@ module.exports = () => {
     },
     plugins: [
       new HtmlWebpackPlugin({
+        template: "./index.html",
         title: "Just Another Text Editor",
-        template: "./src/index.html",
       }),
+
+      new InjectManifest({
+        swSrc: "./src-sw.js",
+        swDest: "src-sw.js",
+      }),
+
       new WebpackPwaManifest({
+        fingerprints: false,
+        inject: true,
         name: "Just Another Text Editor",
-        short_name: "Text Editor",
-        description:
-          "A sophisticated text editor for both online and offline use.",
-        background_color: "#FFFFFF",
-        theme_color: "#333333",
+        short_name: "text editor",
+        description: "Edit your text on- or off-line",
+        background_color: "#225ca3",
+        theme_color: "#225ca3",
         start_url: "/",
         publicPath: "/",
         icons: [
           {
             src: path.resolve("src/images/logo.png"),
-            sizes: [96, 120, 200, 250, 400, 500],
+            sizes: [96, 128, 192, 256, 384, 512],
             destination: path.join("assets", "icons"),
           },
         ],
       }),
-      new InjectManifest({
-        swSrc: "./src-sw.js",
-        swDest: "sw.js",
-      }),
     ],
 
     module: {
+      // CSS loaders
       rules: [
         {
           test: /\.css$/i,
           use: ["style-loader", "css-loader"],
         },
         {
-          test: /\.(png|svg|jpg|jpeg|gif)$/i,
-          type: "asset/resource",
-        },
-        {
-          test: /\.m?js/,
-          exclude: /(node_modules|browser_components)/,
+          test: /\.m?js$/,
+          exclude: /node_modules/,
+          // We use babel-loader in order to use ES6.
           use: {
             loader: "babel-loader",
             options: {
